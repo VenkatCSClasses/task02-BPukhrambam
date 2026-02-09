@@ -1,0 +1,280 @@
+version: "0.1.0"
+
+# Bank Account Test Cases
+
+getBalance:
+  - name: "normal case - positive balance"
+    input: { email: "a@b.com", initialBalance: 200 }
+    output: 200
+
+  - name: "boundary case - zero balance"
+    input: { email: "b@c.com", initialBalance: 0 }
+    output: 0
+
+withdraw:
+  - name: "normal withdraw - amount less than balance"
+    input: { email: "a@b.com", initialBalance: 200, withdrawAmount: 100 }
+    output: { balance: 100, exception: null }
+
+  - name: "boundary - amount equals balance"
+    input: { email: "a@b.com", initialBalance: 100, withdrawAmount: 100 }
+    output: { balance: 0, exception: null }
+
+  - name: "boundary - negative amount"
+    input: { email: "b@c.com", initialBalance: 100, withdrawAmount: -50 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - zero amount"
+    input: { email: "b@c.com", initialBalance: 100, withdrawAmount: 0 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - three digits after decimal"
+    input: { email: "b@c.com", initialBalance: 100, withdrawAmount: 10.001 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - amount just over balance"
+    input: { email: "b@c.com", initialBalance: 100, withdrawAmount: 100.01 }
+    output: { exception: "InsufficientFundsException" }
+
+  - name: "not boundary - amount well over balance"
+    input: { email: "b@c.com", initialBalance: 100, withdrawAmount: 150 }
+    output: { exception: "InsufficientFundsException" }
+
+isEmailValid:
+  - name: "prefix with underscore"
+    input: "abc_def@mail.com"
+    output: true
+
+  - name: "prefix with period"
+    input: "abc.def@mail.com"
+    output: true
+
+  - name: "prefix with hyphen"
+    input: "abc-d@mail.com"
+    output: true
+
+  - name: "domain with hyphen"
+    input: "abc.def@mail-archive.com"
+    output: true
+
+  - name: "border - minimum prefix length"
+    input: "b@google.com"
+    output: true
+
+  - name: "middle case - prefix length three"
+    input: "abc@hotmail.com"
+    output: true
+
+  - name: "border - blank domain"
+    input: " baneet@"
+    output: false
+
+  - name: "border - minimum domain length"
+    input: "b@g.co"
+    output: true
+
+  - name: "middle case - domain length more than three"
+    input: "abc@yahoo.com"
+    output: true
+
+  - name: "border - domain tag length one"
+    input: "abc@def.g"
+    output: false
+
+constructor:
+  - name: "correct email and balance"
+    input: { email: "a@b.com", balance: 200 }
+    output: { email: "a@b.com", balance: 200 }
+
+  - name: "amount with two digits after decimal"
+    input: { email: "b@g.com", balance: 20.34 }
+    output: { email: "b@g.com", balance: 20.34 }
+
+  - name: "no email"
+    input: { email: "", balance: 100 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "negative amount"
+    input: { email: "b@c.com", balance: -100.02 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "amount with more than two digits after decimal"
+    input: { email: "b@c.com", balance: 100.001 }
+    output: { exception: "IllegalArgumentException" }
+
+isAmountValid:
+  - name: "boundary case - lowest three digits after decimal"
+    input: 0.001
+    output: false
+
+  - name: "not boundary - three digits after decimal"
+    input: 54.021
+    output: false
+
+  - name: "boundary case - highest two digits after decimal"
+    input: 0.99
+    output: true
+
+  - name: "not boundary - one digit after decimal"
+    input: 2.1
+    output: true
+
+  - name: "not boundary - two digits after decimal"
+    input: 200.01
+    output: true
+
+  - name: "boundary - lowest positive amount"
+    input: 0.0
+    output: true
+
+  - name: "not boundary - positive amount"
+    input: 20.0
+    output: true
+
+  - name: "boundary - highest negative amount"
+    input: -0.01
+    output: false
+
+  - name: "not boundary - negative amount"
+    input: -100.00
+    output: false
+
+deposit:
+  - name: "not boundary - valid deposit"
+    input: { email: "a@b.com", initialBalance: 100, depositAmount: 50 }
+    output: { balance: 150, exception: null }
+
+  - name: "not boundary - negative amount"
+    input: { email: "a@b.com", initialBalance: 100, depositAmount: -20 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - highest negative amount"
+    input: { email: "a@b.com", initialBalance: 100, depositAmount: -0.01 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - zero deposit"
+    input: { email: "a@b.com", initialBalance: 150, depositAmount: 0 }
+    output: { balance: 150, exception: null }
+
+  - name: "boundary - three digits after decimal"
+    input: { email: "a@b.com", initialBalance: 150, depositAmount: 10.001 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "not boundary - more than three digits after decimal"
+    input: { email: "a@b.com", initialBalance: 150, depositAmount: 5.6789 }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - valid deposit with highest two digits after decimal"
+    input: { email: "a@b.com", initialBalance: 150, depositAmount: 20.99 }
+    output: { balance: 170.99, exception: null }
+
+transfer:
+  - name: "not boundary - valid transfer"
+    input:
+      {
+        fromEmail: "a@b.com",
+        fromBalance: 200,
+        toEmail: "b@c.com",
+        toBalance: 100,
+        transferAmount: 50,
+      }
+    output: { fromBalance: 150, toBalance: 150, exception: null }
+
+  - name: "boundary - transfer entire balance"
+    input:
+      {
+        fromEmail: "a@b.com",
+        fromBalance: 150,
+        toEmail: "b@c.com",
+        toBalance: 150,
+        transferAmount: 150,
+      }
+    output: { fromBalance: 0, toBalance: 300, exception: null }
+
+  - name: "not boundary - negative amount"
+    input:
+      {
+        fromEmail: "b@c.com",
+        fromBalance: 300,
+        toEmail: "a@b.com",
+        toBalance: 0,
+        transferAmount: -20,
+      }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - highest negative amount"
+    input:
+      {
+        fromEmail: "b@c.com",
+        fromBalance: 300,
+        toEmail: "a@b.com",
+        toBalance: 0,
+        transferAmount: -0.01,
+      }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - three digits after decimal"
+    input:
+      {
+        fromEmail: "b@c.com",
+        fromBalance: 300,
+        toEmail: "a@b.com",
+        toBalance: 0,
+        transferAmount: 10.001,
+      }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "not boundary - more than three digits after decimal"
+    input:
+      {
+        fromEmail: "b@c.com",
+        fromBalance: 300,
+        toEmail: "a@b.com",
+        toBalance: 0,
+        transferAmount: 5.6789,
+      }
+    output: { exception: "IllegalArgumentException" }
+
+  - name: "boundary - highest two digits after decimal"
+    input:
+      {
+        fromEmail: "b@c.com",
+        fromBalance: 300,
+        toEmail: "a@b.com",
+        toBalance: 0,
+        transferAmount: 50.99,
+      }
+    output: { fromBalance: 249.01, toBalance: 50.99, exception: null }
+
+  - name: "boundary - amount just over balance"
+    input:
+      {
+        fromEmail: "a@b.com",
+        fromBalance: 50.99,
+        toEmail: "b@c.com",
+        toBalance: 249.01,
+        transferAmount: 51,
+      }
+    output: { exception: "InsufficientFundsException" }
+
+  - name: "not boundary - amount well over balance"
+    input:
+      {
+        fromEmail: "a@b.com",
+        fromBalance: 50.99,
+        toEmail: "b@c.com",
+        toBalance: 249.01,
+        transferAmount: 100,
+      }
+    output: { exception: "InsufficientFundsException" }
+
+  - name: "boundary - just below entire remaining balance"
+    input:
+      {
+        fromEmail: "a@b.com",
+        fromBalance: 50.99,
+        toEmail: "b@c.com",
+        toBalance: 249.01,
+        transferAmount: 50.98,
+      }
+    output: { fromBalance: 0.01, toBalance: 299.99, exception: null }
